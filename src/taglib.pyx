@@ -16,7 +16,6 @@ cdef unicode toUnicode(ctypes.String s):
     """Converts TagLib::String to a unicode string (``str`` in Python 3, ``unicode`` else)."""
     return s.to8Bit(True).decode('UTF-8', 'replace')
 
-
 cdef dict propertyMapToDict(ctypes.PropertyMap map):
     """Convert a TagLib::PropertyMap to a dict mapping unicode string to list of unicode strings."""
     cdef:
@@ -32,14 +31,13 @@ cdef dict propertyMapToDict(ctypes.PropertyMap map):
             dct[tag].append(toUnicode(value))
     return dct
 
-
 cdef class File:
     """Class representing an audio file with metadata ("tags").
     
     To read tags from an audio file, create a *File* object, passing the file's path to the
     constructor (should be a unicode string):
     
-    >>> f = taglib.File('/path/to/file.ogg')
+    >>> f = File('/path/to/file.ogg')
     
     The tags are stored in the attribute *tags* as a *dict* mapping strings (tag names)
     to lists of strings (tag values).
@@ -61,7 +59,7 @@ cdef class File:
 
     >>> f.save()
     """
-    cdef ctypes.File *cFile
+    cdef ctypes.FileRef *cFile
     cdef public dict tags
     cdef bytes bPath
     cdef readonly object path
@@ -75,9 +73,9 @@ cdef class File:
         IF UNAME_SYSNAME == "Windows":
             # create on windows takes wchar_t* which Cython automatically converts to
             # from unicode strings
-            self.cFile = ctypes.create(self.path)
+            self.cFile = new ctypes.FileRef(self.path)
         ELSE:
-            self.cFile = ctypes.create(self.bPath)
+            self.cFile = new ctypes.FileRef(self.bPath)
         if not self.cFile or not self.cFile.isValid():
             raise OSError(f'Could not read file {path}')
 
@@ -92,7 +90,7 @@ cdef class File:
         This method is not accessible from Python, and is called only once, immediately after
         object creation.
         """
-        
+
         cdef:
             ctypes.PropertyMap cTags = self.cFile.properties()
             ctypes.String cString
@@ -132,7 +130,7 @@ cdef class File:
                 cKey = ctypes.String(key.upper().encode('UTF-8'), ctypes.UTF8)
             if isinstance(values, bytes) or isinstance(values, unicode):
                 # the user has accidentally used a single tag value instead a length-1 list
-                values = [ values ]
+                values = [values]
             for value in values:
                 if isinstance(value, bytes):
                     cValue = ctypes.String(value, ctypes.UTF8)
@@ -145,7 +143,7 @@ cdef class File:
         if not success:
             raise OSError('Unable to save tags: Unknown OS error')
         return propertyMapToDict(cRemaining)
-    
+
     def removeUnsupportedProperties(self, properties):
         """This is a direct binding for the corresponding TagLib method."""
         if not self.cFile:
@@ -165,36 +163,35 @@ cdef class File:
     def __dealloc__(self):
         if self.cFile:
             del self.cFile
-        
+
+    cdef void assertValid(self) except +:
+        if not self.cFile:
+            raise ValueError('I/O operation on closed file.')
+
     property length:
         def __get__(self):
-            if not self.cFile:
-                raise ValueError('I/O operation on closed file.')
+            self.assertValid()
             return self.cFile.audioProperties().length()
-            
+
     property bitrate:
         def __get__(self):
-            if not self.cFile:
-                raise ValueError('I/O operation on closed file.')
+            self.assertValid()
             return self.cFile.audioProperties().bitrate()
-    
+
     property sampleRate:
         def __get__(self):
-            if not self.cFile:
-                raise ValueError('I/O operation on closed file.')
+            self.assertValid()
             return self.cFile.audioProperties().sampleRate()
-            
+
     property channels:
         def __get__(self):
-            if not self.cFile:
-                raise ValueError('I/O operation on closed file.')
+            self.assertValid()
             return self.cFile.audioProperties().channels()
-    
+
     property readOnly:
         def __get__(self):
-            if not self.cFile:
-                raise ValueError('I/O operation on closed file.')
-            return self.cFile.readOnly()
-        
+            self.assertValid()
+            return self.cFile.file().readOnly()
+
     def __repr__(self):
         return f"File('{self.path}')"

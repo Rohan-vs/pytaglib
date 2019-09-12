@@ -28,18 +28,18 @@ cdef extern from 'taglib/tstringlist.h' namespace 'TagLib':
     cdef cppclass StringList:
         list[String].iterator begin()
         list[String].iterator end()
-        void append(String&)
+        void append(String &)
 
 
 cdef extern from 'taglib/tpropertymap.h' namespace 'TagLib':
     cdef cppclass PropertyMap:
-        map[String,StringList].iterator begin()
-        map[String,StringList].iterator end()
-        StringList& operator[](String&)
+        map[String, StringList].iterator begin()
+        map[String, StringList].iterator end()
+        StringList& operator[](String &)
         StringList& unsupportedData()
         int size()
 
-    
+
 cdef extern from 'taglib/audioproperties.h' namespace 'TagLib':
     cdef cppclass AudioProperties:
         int length()
@@ -48,19 +48,17 @@ cdef extern from 'taglib/audioproperties.h' namespace 'TagLib':
         int channels()
 
 
-cdef extern from 'taglib/tfile.h' namespace 'TagLib':
+cdef extern from 'taglib/fileref.h' namespace 'TagLib':
     cdef cppclass File:
+        bint readOnly()
+
+cdef extern from 'taglib/fileref.h' namespace 'TagLib':
+    cdef cppclass FileRef:
+        FileRef(const char*) except +
         AudioProperties *audioProperties()
         bint save() except +
         bint isValid()
-        bint readOnly()
+        File *file()
         PropertyMap properties()
-        PropertyMap setProperties(PropertyMap&)
-        void removeUnsupportedProperties(StringList&)
-
-
-cdef extern from 'taglib/fileref.h' namespace 'TagLib::FileRef':
-    IF UNAME_SYSNAME == "Windows":
-        cdef File* create(const Py_UNICODE*) except +
-    ELSE:
-        cdef File* create(const char*) except +
+        PropertyMap setProperties(PropertyMap &)
+        void removeUnsupportedProperties(StringList &)
