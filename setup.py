@@ -37,6 +37,7 @@ def readme():
 
 script_name = 'pyprinttags3' if sys.version_info[0] >= 3 else 'pyprinttags'
 is_windows = sys.platform.startswith('win')
+os.environ["TAGLIB_HOME"] = os.getcwd()+"/src/taglib"
 
 
 def extension_kwargs():

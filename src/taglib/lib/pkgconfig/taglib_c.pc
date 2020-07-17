@@ -1,0 +1,12 @@
+prefix=C:/Users/rsuri/Downloads/taglib/taglib-install
+exec_prefix=C:/Users/rsuri/Downloads/taglib/taglib-install
+libdir=C:/Users/rsuri/Downloads/taglib/taglib-install/lib
+includedir=C:/Users/rsuri/Downloads/taglib/taglib-install/include
+
+
+Name: TagLib C Bindings
+Description: Audio meta-data library (C bindings)
+Requires: taglib
+Version: 1.11.1
+Libs: -LC:/Users/rsuri/Downloads/taglib/taglib-install/lib -ltag_c
+Cflags: -IC:/Users/rsuri/Downloads/taglib/taglib-install/include/taglib 
