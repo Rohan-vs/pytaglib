@@ -13,6 +13,7 @@ import re
 from os.path import join, dirname
 from setuptools import setup
 from distutils.extension import Extension
+from subprocess import call
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
@@ -38,7 +39,8 @@ def readme():
 script_name = 'pyprinttags3' if sys.version_info[0] >= 3 else 'pyprinttags'
 is_windows = sys.platform.startswith('win')
 os.environ["TAGLIB_HOME"] = os.getcwd()+"/src/taglib"
-
+print("CALLING G++ WOOOOOOO ----------------------------------------------------------")
+call("g++")
 
 def extension_kwargs():
     if is_windows:
