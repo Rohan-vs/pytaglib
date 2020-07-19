@@ -7,7 +7,6 @@ dist
 .tox
 .idea
 *.pyc
-*.so
 *.pyd
 .eggs
 .vscode
